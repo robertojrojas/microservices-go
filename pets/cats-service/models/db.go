@@ -1,4 +1,4 @@
-package main
+package models
 
 import (
 	"database/sql"
@@ -8,12 +8,22 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-var db *sql.DB
+type catsDB struct {
+	CatsDataStore
+	db *sql.DB
+}
 
-var dbURL string
+// NewCatsDB returns a new CatsDataStore
+func NewCatsDB(dbURL string) CatsDataStore {
+	db := connectToDB(dbURL)
+	return &catsDB{
+		db: db,
+	}
+}
 
 // ConnectToDB connects to the database
-func ConnectToDB() {
+func connectToDB(dbURL string) (db *sql.DB) {
+	log.Printf("Connecting to DB[%s]....\n", dbURL)
 	conn, err := sql.Open("mysql", dbURL)
 	if err != nil {
 		log.Fatal(err)
@@ -24,17 +34,19 @@ func ConnectToDB() {
 		log.Fatal(err)
 	}
 
-	db = conn
+	return conn
+
 }
 
-func readAllCats() (cats []*Cat, err error) {
+func (dbWrapper *catsDB) ReadAllCats() (cats []*Cat, err error) {
 
-	rows, err := db.Query("select * from cats")
+	rows, err := dbWrapper.db.Query("select * from cats")
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
+	cats = []*Cat{}
 	for rows.Next() {
 		cat := &Cat{}
 		err = rows.Scan(
@@ -57,9 +69,9 @@ func readAllCats() (cats []*Cat, err error) {
 	return
 }
 
-func createCat(cat *Cat) (err error) {
+func (dbWrapper *catsDB) CreateCat(cat *Cat) (err error) {
 
-	stmt, err := db.Prepare("insert into cats set cat_name=?, cat_age=?, cat_type=?")
+	stmt, err := dbWrapper.db.Prepare("insert into cats set cat_name=?, cat_age=?, cat_type=?")
 	if err != nil {
 		return
 	}
@@ -76,10 +88,10 @@ func createCat(cat *Cat) (err error) {
 	return
 }
 
-func readCat(id int64) (cat *Cat, err error) {
+func (dbWrapper *catsDB) ReadCat(id int64) (cat *Cat, err error) {
 
 	cat = &Cat{}
-	err = db.QueryRow(
+	err = dbWrapper.db.QueryRow(
 		"select cat_id, cat_name, cat_age, cat_type from cats where cat_id=?", id).
 		Scan(
 		&cat.ID,
@@ -94,9 +106,9 @@ func readCat(id int64) (cat *Cat, err error) {
 	return
 }
 
-func updateCat(cat *Cat) (err error) {
+func (dbWrapper *catsDB) UpdateCat(cat *Cat) (err error) {
 
-	stmt, err := db.Prepare("update cats set cat_name=?, cat_age=?, cat_type=? where cat_id = ?")
+	stmt, err := dbWrapper.db.Prepare("update cats set cat_name=?, cat_age=?, cat_type=? where cat_id = ?")
 	if err != nil {
 		return
 	}
@@ -118,9 +130,9 @@ func updateCat(cat *Cat) (err error) {
 	return
 }
 
-func deleteCat(id int64) (err error) {
+func (dbWrapper *catsDB) DeleteCat(id int64) (err error) {
 
-	stmt, err := db.Prepare("delete from cats where cat_id=?")
+	stmt, err := dbWrapper.db.Prepare("delete from cats where cat_id=?")
 	if err != nil {
 		return
 	}

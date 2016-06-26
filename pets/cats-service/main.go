@@ -1,9 +1,13 @@
 package main
 
-import "flag"
+import (
+	"flag"
+
+	"github.com/robertojrojas/microservices-go/pets/cats-service/server"
+)
 
 func main() {
-	flag.Parse()
 
-	StartServer()
+	flag.Parse()
+	server.StartServer()
 }

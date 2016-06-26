@@ -1,4 +1,4 @@
-package main
+package routes
 
 import (
 	"database/sql"
@@ -9,9 +9,32 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
+	"github.com/robertojrojas/microservices-go/pets/cats-service/models"
 )
 
-func createHandler(w http.ResponseWriter, r *http.Request) {
+// CatsRoutesHandler represents the HTTP Handler methods
+type CatsRoutesHandler interface {
+	CreateHandler(w http.ResponseWriter, r *http.Request)
+	ReadAllHandler(w http.ResponseWriter, r *http.Request)
+	ReadHandler(w http.ResponseWriter, r *http.Request)
+	UpdateHandler(w http.ResponseWriter, r *http.Request)
+	DeleteHandler(w http.ResponseWriter, r *http.Request)
+}
+
+// CatsRoutes implements HTTP Handlers
+type CatsRoutes struct {
+	catsDBStore models.CatsDataStore
+	CatsRoutesHandler
+}
+
+// NewCatsRoutes return a new CatsRoutesHandler
+func NewCatsRoutes(dataStore models.CatsDataStore) CatsRoutesHandler {
+	return &CatsRoutes{
+		catsDBStore: dataStore,
+	}
+}
+
+func (cr *CatsRoutes) CreateHandler(w http.ResponseWriter, r *http.Request) {
 
 	data, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -19,14 +42,14 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cat := &Cat{}
+	cat := &models.Cat{}
 	err = json.Unmarshal(data, cat)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	err = createCat(cat)
+	err = cr.catsDBStore.CreateCat(cat)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -35,9 +58,9 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
-func readAllHandler(w http.ResponseWriter, r *http.Request) {
+func (cr *CatsRoutes) ReadAllHandler(w http.ResponseWriter, r *http.Request) {
 
-	cats, err := readAllCats()
+	cats, err := cr.catsDBStore.ReadAllCats()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -53,7 +76,7 @@ func readAllHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func readHandler(w http.ResponseWriter, r *http.Request) {
+func (cr *CatsRoutes) ReadHandler(w http.ResponseWriter, r *http.Request) {
 	idStr := mux.Vars(r)["id"]
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
@@ -61,7 +84,7 @@ func readHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cat, err := readCat(id)
+	cat, err := cr.catsDBStore.ReadCat(id)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			w.WriteHeader(http.StatusNotFound)
@@ -82,7 +105,7 @@ func readHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, string(catData))
 }
 
-func updateHandler(w http.ResponseWriter, r *http.Request) {
+func (cr *CatsRoutes) UpdateHandler(w http.ResponseWriter, r *http.Request) {
 
 	data, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -90,7 +113,7 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cat := &Cat{}
+	cat := &models.Cat{}
 	err = json.Unmarshal(data, cat)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -99,17 +122,17 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	cat.ID = int64(id)
 
-	err = updateCat(cat)
+	err = cr.catsDBStore.UpdateCat(cat)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
 }
 
-func deleteHandler(w http.ResponseWriter, r *http.Request) {
+func (cr *CatsRoutes) DeleteHandler(w http.ResponseWriter, r *http.Request) {
 	idStr := mux.Vars(r)["id"]
 	id, err := strconv.ParseInt(idStr, 10, 64)
-	err = deleteCat(id)
+	err = cr.catsDBStore.DeleteCat(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
