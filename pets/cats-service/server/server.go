@@ -21,7 +21,7 @@ func init() {
 }
 
 // StartServer configures and starts API Server
-func StartServer() {
+func StartServer() error {
 
 	router := mux.NewRouter()
 	catsDB := models.NewCatsDB(*dbURL)
@@ -34,5 +34,5 @@ func StartServer() {
 	http.Handle("/", router)
 
 	log.Printf("Listening on [%s]....\n", serverHostPort)
-	http.ListenAndServe(serverHostPort, nil)
+	return http.ListenAndServe(serverHostPort, nil)
 }
