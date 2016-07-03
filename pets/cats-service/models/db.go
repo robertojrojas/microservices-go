@@ -29,6 +29,10 @@ func connectToDB(dbURL string) (db *sql.DB) {
 		log.Fatal(err)
 	}
 
+	//Connection pool sample configuration
+	theDB.SetMaxIdleConns(2)
+	theDB.SetMaxOpenConns(10)
+
 	err = theDB.Ping()
 	if err != nil {
 		log.Fatal(err)
