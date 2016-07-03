@@ -24,23 +24,23 @@ func NewCatsDB(dbURL string) CatsDataStore {
 // ConnectToDB connects to the database
 func connectToDB(dbURL string) (db *sql.DB) {
 	log.Printf("Connecting to DB[%s]....\n", dbURL)
-	conn, err := sql.Open("mysql", dbURL)
+	theDB, err := sql.Open("mysql", dbURL)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = conn.Ping()
+	err = theDB.Ping()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	return conn
+	return theDB
 
 }
 
 func (dbWrapper *catsDB) ReadAllCats() (cats []*Cat, err error) {
 
-	rows, err := dbWrapper.db.Query("select * from cats")
+	rows, err := dbWrapper.db.Query("select cat_id, cat_name, cat_age, cat_type from cats")
 	if err != nil {
 		return nil, err
 	}
