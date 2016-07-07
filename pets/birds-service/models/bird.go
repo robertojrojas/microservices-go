@@ -130,5 +130,5 @@ func GetBirdTypeStringFromType(birdType Bird_BirdType) (birdTypeStr string) {
 		birdTypeStr = "WRENS"
 
 	}
-
+	return
 }

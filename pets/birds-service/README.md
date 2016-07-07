@@ -1,0 +1,16 @@
+CREATE ROLE birdman LOGIN ENCRYPTED PASSWORD 'md5b98c303b42fe12e1677003b80792bdb8'
+  SUPERUSER CREATEDB CREATEROLE
+   VALID UNTIL 'infinity';
+
+
+ CREATE DATABASE birddb
+  WITH ENCODING='UTF8'
+       OWNER=birdman
+       CONNECTION LIMIT=-1;  
+
+CREATE TABLE birds(
+ bird_id serial PRIMARY KEY,
+ bird_name VARCHAR (50) UNIQUE NOT NULL,
+ bird_age  integer NOT NULL,
+ bird_type VARCHAR (50) NOT NULL 
+);
