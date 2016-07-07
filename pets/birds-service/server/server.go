@@ -54,11 +54,27 @@ func (s *server) AllBirds(ctx context.Context, in *pb.Empty) (birdCatalog *pb.Bi
 
 }
 
-func (s *server) CreateBird(ctx context.Context, in *pb.Bird) (*pb.Bird, error) {
+func (s *server) CreateBird(ctx context.Context, in *pb.Bird) (out *pb.Bird, err error) {
 
-	bird := &pb.Bird{}
+	birdRecord := &pb.BirdRecord{
+		Name: in.Name,
+		Age:  in.Age,
+		Type: pb.GetBirdTypeStringFromType(in.Type),
+	}
 
-	return bird, nil
+	err = s.birdsDBStore.CreateBird(birdRecord)
+	if err != nil {
+		return
+	}
+
+	out = &pb.Bird{
+		Id:   birdRecord.ID,
+		Name: birdRecord.Name,
+		Age:  birdRecord.Age,
+		Type: pb.BirdTypeFromString(birdRecord.Type),
+	}
+
+	return
 
 }
 
