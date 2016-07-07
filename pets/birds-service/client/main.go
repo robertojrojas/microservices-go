@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	address = "localhost:50051"
+	address = "localhost:8092"
 )
 
 func main() {
@@ -28,5 +28,8 @@ func main() {
 	if err != nil {
 		log.Fatalf("could not greet: %v", err)
 	}
-	log.Printf("Results: %#v\n", r.Message)
+	for _, bird := range r.Birds {
+		log.Printf("Results: %#v\n", bird)
+	}
+
 }
