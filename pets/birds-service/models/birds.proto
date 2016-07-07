@@ -7,7 +7,7 @@ message Empty {}
 message Bird {
 
    string name = 1;
-   int32 id    = 2;  // Unique ID number for this Bird.
+   int64 id    = 2;  // Unique ID number for this Bird.
    int32 age   = 3;
 
    enum BirdType {
@@ -35,6 +35,7 @@ message Bird {
         WARBLERSWOODPECKER=20;
         WOODPECKERSWREN=21;
         WRENS=22;
+        UNKNOWN=23;
 
    }
 

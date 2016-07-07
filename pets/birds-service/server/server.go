@@ -32,11 +32,25 @@ func NewBirdsServer(dataStore pb.BirdsDataStore) *server {
 	}
 }
 
-func (s *server) AllBirds(ctx context.Context, in *pb.Empty) (*pb.BirdCatalog, error) {
+func (s *server) AllBirds(ctx context.Context, in *pb.Empty) (birdCatalog *pb.BirdCatalog, err error) {
 
-	birdCatalog := &pb.BirdCatalog{}
+	birdRecords, err := s.birdsDBStore.ReadAllBirds()
+	if err != nil {
+		return
+	}
 
-	return birdCatalog, nil
+	birdCatalog = &pb.BirdCatalog{}
+	for _, birdRecord := range birdRecords {
+		bird := &pb.Bird{
+			Name: birdRecord.Name,
+			Id:   birdRecord.ID,
+			Age:  birdRecord.Age,
+			Type: pb.BirdTypeFromString(birdRecord.Type),
+		}
+		birdCatalog.Birds = append(birdCatalog.Birds, bird)
+	}
+
+	return
 
 }
 
