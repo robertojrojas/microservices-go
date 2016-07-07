@@ -1,0 +1,68 @@
+syntax = "proto3";
+
+option go_package = "models";
+
+message Empty {}
+
+message Bird {
+
+   string name = 1;
+   int32 id    = 2;  // Unique ID number for this Bird.
+   int32 age   = 3;
+
+   enum BirdType {
+
+        BLACKBIRD=0;
+        BLACKBIRDSCHICKADEE=1;
+        CHICKADEESCROW=2;
+        CROWSDOVE=3;
+        DOVESDUCK=4;
+        DUCKSFINCH=5;
+        FINCHESFLYCATCHER=6;
+        FLYCATCHERSGAMEBIRD=7;
+        GAMEBIRDSGULL=8;
+        GULLSHAWK=9;
+        HAWKSHERON=10;
+        HERONSHUMMINGBIRD=11;
+        HUMMINGBIRDSKINGFISHER=12;
+        KINGFISHERSNUTHATCH=13;
+        NUTHATCHESOWL=14;
+        OWLSSHOREBIRD=15;
+        SHOREBIRDSSPARROW=16;
+        SPARROWSSWALLOW=17;
+        SWALLOWSTHRUSH=18;
+        THRUSHESWARBLER=19;
+        WARBLERSWOODPECKER=20;
+        WOODPECKERSWREN=21;
+        WRENS=22;
+
+   }
+
+   BirdType type = 4;
+     
+}
+
+message BirdId {
+   int32 id = 1;  // Unique ID number for this Bird.
+}
+
+message BirdCatalog {
+   repeated Bird birds = 1;
+}
+
+// The Bird Repository service definition.
+service BirdRepository {
+
+  rpc AllBirds (Empty) returns (BirdCatalog) {}
+
+  rpc CreateBird (Bird) returns (Bird) {}
+
+  rpc ReadBird (BirdId) returns (Bird) {}
+
+  rpc UpdateBird (Bird) returns (Bird) {}
+
+  rpc DeleteBird (BirdId) returns (Empty) {}
+
+}
+
+
