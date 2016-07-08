@@ -75,21 +75,18 @@ func (dbWrapper *birdsDB) ReadAllBirds() (birds []*BirdRecord, err error) {
 
 func (dbWrapper *birdsDB) CreateBird(bird *BirdRecord) (err error) {
 
-	stmt, err := dbWrapper.db.Prepare("insert into birds set bird_name=?, bird_age=?, bird_type=$1")
+	var birdID int64
+	err =
+		dbWrapper.db.QueryRow("insert into birds( bird_name, bird_age, bird_type) VALUES ($1, $2, $3)  RETURNING bird_id",
+			bird.Name, bird.Age, bird.Type).Scan(&birdID)
 	if err != nil {
 		return
 	}
-	defer stmt.Close()
 
-	res, err := stmt.Exec(bird.Name, bird.Age, bird.Type)
-	if err != nil {
-		return
-	}
-	bird.ID, err = res.LastInsertId()
-	if err != nil {
-		return
-	}
+	bird.ID = birdID
+
 	return
+
 }
 
 func (dbWrapper *birdsDB) ReadBird(id int64) (bird *BirdRecord, err error) {

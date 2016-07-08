@@ -2,6 +2,7 @@ package server
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"net"
 
@@ -64,6 +65,7 @@ func (s *server) CreateBird(ctx context.Context, in *pb.Bird) (out *pb.Bird, err
 
 	err = s.birdsDBStore.CreateBird(birdRecord)
 	if err != nil {
+		fmt.Println("Err", err)
 		return
 	}
 
