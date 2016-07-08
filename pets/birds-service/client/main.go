@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"os"
 
 	pb "github.com/robertojrojas/microservices-go/pets/birds-service/models"
 
@@ -22,8 +24,21 @@ func main() {
 	defer conn.Close()
 	c := pb.NewBirdRepositoryClient(conn)
 
-	// Contact the server and print out its response.
+	if len(os.Args) > 1 {
+		bird := &pb.Bird{
+			Name: "chicken little",
+			Age:  5,
+			Type: pb.Bird_BLACKBIRDSCHICKADEE,
+		}
+		fmt.Println("Creating bird")
+		bird, err = c.CreateBird(context.Background(), bird)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 
+	// Contact the server
+	// and print out its response.
 	r, err := c.AllBirds(context.Background(), &pb.Empty{})
 	if err != nil {
 		log.Fatalf("could not greet: %v", err)
