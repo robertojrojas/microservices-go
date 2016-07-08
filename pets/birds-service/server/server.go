@@ -112,6 +112,7 @@ func StartServer() error {
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
+	log.Printf("Listening on [%s]....\n", serverHostPort)
 	s := grpc.NewServer()
 	pb.RegisterBirdRepositoryServer(s, birdServer)
 	return s.Serve(lis)
