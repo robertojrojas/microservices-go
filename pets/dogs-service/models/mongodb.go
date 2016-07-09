@@ -5,6 +5,10 @@ type DogMongoStore struct {
 	DogsDataStore
 }
 
+func NewDogMongoStore() *DogMongoStore {
+	return &DogMongoStore{}
+}
+
 func (dataStore *DogMongoStore) ReadAllDogs() (dogs []*Dog, err error) {
 	return
 }

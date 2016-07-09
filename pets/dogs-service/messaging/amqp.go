@@ -10,13 +10,15 @@ import (
 type AMQManager struct {
 	messageHandler *MessageHandler
 	amqpURL        string
+	amqpQueue      string
 	conn           *amqp.Connection
 	ch             *amqp.Channel
 }
 
-func NewAMQManager(amqpURL string, messageHandler *MessageHandler) *AMQManager {
+func NewAMQManager(amqpURL string, amqpQueue string, messageHandler *MessageHandler) *AMQManager {
 	return &AMQManager{
 		amqpURL:        amqpURL,
+		amqpQueue:      amqpQueue,
 		messageHandler: messageHandler,
 	}
 }
@@ -76,12 +78,12 @@ func (manager *AMQManager) prepareToAcceptMessages() (msgs <-chan amqp.Delivery,
 	manager.ch = ch
 
 	q, err := ch.QueueDeclare(
-		"rpc_queue", // name
-		false,       // durable
-		false,       // delete when usused
-		false,       // exclusive
-		false,       // no-wait
-		nil,         // arguments
+		manager.amqpQueue, // name
+		false,             // durable
+		false,             // delete when usused
+		false,             // exclusive
+		false,             // no-wait
+		nil,               // arguments
 	)
 
 	if err != nil {
