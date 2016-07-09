@@ -2,6 +2,7 @@ package messaging
 
 import (
 	"encoding/json"
+	"log"
 
 	"github.com/robertojrojas/microservices-go/pets/dogs-service/models"
 )
@@ -102,33 +103,41 @@ func (messageHandler *MessageHandler) RouteMessage(message []byte) (rpcOut *RPCM
 	//      and avoid DRY
 	switch rpcIn.Type {
 	case ReadAllMessage:
+		log.Printf("handling ReadAllMessage...")
 		rpcOut, err = messageHandler.ReadAllDogs(rpcIn)
 		if err != nil {
 			rpcOut = createErrorMessage(err)
 		}
 	case CreateMessage:
+		log.Printf("handling CreateMessage...")
 		rpcOut, err = messageHandler.CreateDog(rpcIn)
 		if err != nil {
 			rpcOut = createErrorMessage(err)
 		}
 	case ReadMessage:
+		log.Printf("handling ReadMessage...")
 		rpcOut, err = messageHandler.ReadDog(rpcIn)
 		if err != nil {
 			rpcOut = createErrorMessage(err)
 		}
 	case UpdateMessage:
+		log.Printf("handling UpdateMessage...")
 		rpcOut, err = messageHandler.UpdateDog(rpcIn)
 		if err != nil {
 			rpcOut = createErrorMessage(err)
 		}
 	case DeleteMessage:
+		log.Printf("handling DeleteMessage...")
 		rpcOut, err = messageHandler.DeleteDog(rpcIn)
 		if err != nil {
 			rpcOut = createErrorMessage(err)
 		}
 	default:
+		log.Printf("handling UnknownMessage...")
 		rpcOut = unknownMessage
 	}
+
+	log.Printf("returning %#v\n", rpcOut.Type)
 
 	return
 }

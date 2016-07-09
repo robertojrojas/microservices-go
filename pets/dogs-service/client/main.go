@@ -5,9 +5,6 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
-	"os"
-	"strconv"
-	"strings"
 	"time"
 
 	"github.com/robertojrojas/microservices-go/pets/dogs-service/messaging"
@@ -32,7 +29,7 @@ func randInt(min int, max int) int {
 	return min + rand.Intn(max-min)
 }
 
-func readAllRPC(n int) (res int, err error) {
+func readAllRPC() (err error) {
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
 	failOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
@@ -54,7 +51,7 @@ func readAllRPC(n int) (res int, err error) {
 	msgs, err := ch.Consume(
 		q.Name, // queue
 		"",     // consumer
-		true,   // auto-ack
+		false,  // auto-ack
 		false,  // exclusive
 		false,  // no-local
 		false,  // no-wait
@@ -73,10 +70,10 @@ func readAllRPC(n int) (res int, err error) {
 	failOnError(err, "Failed to Marshal rpcRequest")
 
 	err = ch.Publish(
-		"",          // exchange
-		"rpc_queue", // routing key
-		false,       // mandatory
-		false,       // immediate
+		"", // exchange
+		"dog_service_rpc_queue", // routing key
+		false, // mandatory
+		false, // immediate
 		amqp.Publishing{
 			ContentType:   "text/plain",
 			CorrelationId: corrId,
@@ -91,7 +88,13 @@ func readAllRPC(n int) (res int, err error) {
 		// 	failOnError(err, "Failed to convert body to integer")
 		// 	break
 		// }
-		fmt.Printf("%#v\n", d)
+		rpcReply := &messaging.RPCMessage{}
+		err := json.Unmarshal(d.Body, rpcReply)
+		if err != nil {
+			failOnError(err, "Failed to convert body to RPCMessage")
+		}
+		fmt.Printf("%s\n", string(rpcReply.Data))
+		break
 	}
 
 	return
@@ -100,23 +103,8 @@ func readAllRPC(n int) (res int, err error) {
 func main() {
 	rand.Seed(time.Now().UTC().UnixNano())
 
-	n := bodyFrom(os.Args)
-
-	log.Printf(" [x] Requesting fib(%d)", n)
-	res, err := readAllRPC(n)
+	log.Println(" [x] Requesting readAllRPC()")
+	err := readAllRPC()
 	failOnError(err, "Failed to handle RPC request")
 
-	log.Printf(" [.] Got %d", res)
-}
-
-func bodyFrom(args []string) int {
-	var s string
-	if (len(args) < 2) || os.Args[1] == "" {
-		s = "30"
-	} else {
-		s = strings.Join(args[1:], " ")
-	}
-	n, err := strconv.Atoi(s)
-	failOnError(err, "Failed to convert arg to integer")
-	return n
 }

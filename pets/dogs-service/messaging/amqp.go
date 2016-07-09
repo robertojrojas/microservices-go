@@ -64,7 +64,7 @@ func (manager *AMQManager) WaitForMessages() (err error) {
 	for d := range msgs {
 		go manager.handleMessage(d)
 	}
-
+	log.Println("Done...")
 	return
 
 }
@@ -132,7 +132,7 @@ func (manager *AMQManager) handleMessage(delivery amqp.Delivery) {
 	}
 
 	err = manager.ch.Publish(
-		"",               // exchange
+		"",               // default exchange
 		delivery.ReplyTo, // routing key
 		false,            // mandatory
 		false,            // immediate
@@ -141,5 +141,11 @@ func (manager *AMQManager) handleMessage(delivery amqp.Delivery) {
 			CorrelationId: delivery.CorrelationId,
 			Body:          reply,
 		})
+
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	delivery.Ack(false)
 
 }
