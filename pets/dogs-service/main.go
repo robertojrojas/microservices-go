@@ -20,6 +20,8 @@ func main() {
 	flag.Parse()
 
 	dogMongoStore := models.NewDogMongoStore(*mongoDBURI, *mongoDBName, *mongoDBCollection)
+	defer dogMongoStore.Disconnect()
+
 	messageHanlder := messaging.NewMessageHandler(dogMongoStore)
 	amqpManager := messaging.NewAMQManager(*uri, *queue, messageHanlder)
 	err := amqpManager.Connect()

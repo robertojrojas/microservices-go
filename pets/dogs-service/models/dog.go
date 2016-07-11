@@ -1,11 +1,13 @@
 package models
 
+import "gopkg.in/mgo.v2/bson"
+
 // Dog data struct
 type Dog struct {
-	ID   string `json:"id" bson:"_id,omitempty"`
-	Name string `json:"name"`
-	Age  int32  `json:"age"`
-	Type string `json:"type"`
+	ID   bson.ObjectId `json:"id" bson:"_id,omitempty"`
+	Name string        `json:"name"`
+	Age  int32         `json:"age"`
+	Type string        `json:"type"`
 }
 
 // DogsDataStore represents interface to manage dogs
