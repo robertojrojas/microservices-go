@@ -2,13 +2,21 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
+	"flag"
 	"fmt"
 	"log"
 	"math/rand"
 	"time"
 
 	"github.com/robertojrojas/microservices-go/pets/dogs-service/messaging"
+	"github.com/robertojrojas/microservices-go/pets/dogs-service/models"
 	"github.com/streadway/amqp"
+)
+
+var (
+	requestType = flag.Int("requestType", 0, "RPC Request Type")
+	dogID       = flag.String("dogID", "", "Dog ID to query for")
 )
 
 func failOnError(err error, msg string) {
@@ -61,10 +69,7 @@ func readAllRPC() (err error) {
 
 	corrId := randomString(32)
 
-	rpcRequest := &messaging.RPCMessage{
-		Type: messaging.ReadAllMessage,
-		Data: []byte(""),
-	}
+	rpcRequest := createRPCRequest()
 
 	rpcData, err := json.Marshal(rpcRequest)
 	failOnError(err, "Failed to Marshal rpcRequest")
@@ -83,11 +88,6 @@ func readAllRPC() (err error) {
 	failOnError(err, "Failed to publish a message")
 
 	for d := range msgs {
-		// if corrId == d.CorrelationId {
-		// 	res, err = strconv.Atoi(string(d.Body))
-		// 	failOnError(err, "Failed to convert body to integer")
-		// 	break
-		// }
 		rpcReply := &messaging.RPCMessage{}
 		err := json.Unmarshal(d.Body, rpcReply)
 		if err != nil {
@@ -100,7 +100,62 @@ func readAllRPC() (err error) {
 	return
 }
 
+func createRPCRequest() (rpcRequest *messaging.RPCMessage) {
+
+	switch messaging.RPCMessageType(*requestType) {
+	case messaging.ReadAllMessage:
+		rpcRequest = readAllDogsRequest()
+	case messaging.CreateMessage:
+		rpcRequest = createDogRequest()
+	case messaging.ReadMessage:
+		if *dogID == "" {
+			failOnError(errors.New("-dogID flag is missing"), "")
+		}
+		rpcRequest = readDogRequest(*dogID)
+	}
+
+	return
+}
+
+func createDogRequest() *messaging.RPCMessage {
+	dog := &models.Dog{
+		Name: "MyDog",
+		Age:  5,
+		Type: "Super",
+	}
+
+	dogData, err := json.Marshal(dog)
+	failOnError(err, "Failed to Marshal Dog object")
+
+	rpcRequest := &messaging.RPCMessage{
+		Type: messaging.CreateMessage,
+		Data: dogData,
+	}
+
+	return rpcRequest
+}
+
+func readAllDogsRequest() *messaging.RPCMessage {
+	rpcRequest := &messaging.RPCMessage{
+		Type: messaging.ReadAllMessage,
+		Data: []byte(""),
+	}
+
+	return rpcRequest
+}
+
+func readDogRequest(id string) *messaging.RPCMessage {
+	rpcRequest := &messaging.RPCMessage{
+		Type: messaging.ReadMessage,
+		Data: []byte(id),
+	}
+
+	return rpcRequest
+}
+
 func main() {
+	flag.Parse()
+
 	rand.Seed(time.Now().UTC().UnixNano())
 
 	log.Println(" [x] Requesting readAllRPC()")

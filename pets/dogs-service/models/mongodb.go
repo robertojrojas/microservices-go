@@ -41,7 +41,6 @@ func (dataStore *DogMongoStore) Disconnect() {
 func (dataStore *DogMongoStore) ReadAllDogs() (dogs []*Dog, err error) {
 
 	dogsCollection := dataStore.Session.DB(dataStore.DBName).C(dataStore.CollectionName)
-
 	err = dogsCollection.Find(bson.M{}).All(&dogs)
 	if err != nil {
 		return
@@ -51,16 +50,19 @@ func (dataStore *DogMongoStore) ReadAllDogs() (dogs []*Dog, err error) {
 }
 
 func (dataStore *DogMongoStore) CreateDog(dog *Dog) (err error) {
+
 	dogsCollection := dataStore.Session.DB(dataStore.DBName).C(dataStore.CollectionName)
 	err = dogsCollection.Insert(dog)
 	return
 }
 
 func (dataStore *DogMongoStore) ReadDog(id string) (dog *Dog, err error) {
-	dogsCollection := dataStore.Session.DB(dataStore.DBName).C(dataStore.CollectionName)
-	err = dogsCollection.Find(bson.M{"_id": id}).One(dog)
 
+	dogsCollection := dataStore.Session.DB(dataStore.DBName).C(dataStore.CollectionName)
+	dog = &Dog{}
+	err = dogsCollection.Find(bson.M{"_id": bson.ObjectIdHex(id)}).One(dog)
 	return
+
 }
 
 func (dataStore *DogMongoStore) UpdateDog(dog *Dog) (err error) {

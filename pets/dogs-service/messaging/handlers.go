@@ -75,6 +75,21 @@ func (messageHandler *MessageHandler) CreateDog(rpcIn *RPCMessage) (rpcOut *RPCM
 
 func (messageHandler *MessageHandler) ReadDog(rpcIn *RPCMessage) (rpcOut *RPCMessage, err error) {
 
+	dog, err := messageHandler.dataStore.ReadDog(string(rpcIn.Data))
+	if err != nil {
+		return
+	}
+
+	dogData, err := json.Marshal(dog)
+	if err != nil {
+		return
+	}
+
+	rpcOut = &RPCMessage{
+		Type: CreateMessage,
+		Data: dogData,
+	}
+
 	return
 }
 
