@@ -16,7 +16,11 @@ func main() {
 	birdsService := &services.BirdService{
 		ServiceAddress: "localhost:8092",
 	}
-	rpcExecutor := executor.NewRPCExecutor(catService, birdsService)
+	dogsService := &services.DogsService{
+		ServiceAddress: "amqp://guest:guest@localhost:5672/",
+		RPCQueue:       "dog_service_rpc_queue",
+	}
+	rpcExecutor := executor.NewRPCExecutor(catService, birdsService, dogsService)
 	results, err := rpcExecutor.GetAllPets()
 	if err != nil {
 		log.Fatal(err)

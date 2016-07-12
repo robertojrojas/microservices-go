@@ -2,12 +2,14 @@ package executor
 
 import (
 	"errors"
+	"log"
 	"time"
 
 	"golang.org/x/net/context"
 
 	birdsModels "github.com/robertojrojas/microservices-go/pets/birds-service/models"
 	catModels "github.com/robertojrojas/microservices-go/pets/cats-service/models"
+	dogsModels "github.com/robertojrojas/microservices-go/pets/dogs-service/models"
 	"github.com/robertojrojas/microservices-go/pets/pets-service/services"
 )
 
@@ -16,18 +18,22 @@ type RPCExecutor struct {
 	CatService *services.CatService
 
 	BirdsService *services.BirdService
-	// Dog Service
+
+	DogsService *services.DogsService
 }
 
 type RPCResult struct {
 	Cats  []*catModels.Cat    `json:"cats"`
 	Birds []*birdsModels.Bird `json:"birds"`
+	Dogs  []*dogsModels.Dog   `json:"dogs"`
 }
 
-func NewRPCExecutor(catService *services.CatService, birdsService *services.BirdService) *RPCExecutor {
+func NewRPCExecutor(catService *services.CatService, birdsService *services.BirdService,
+	dogsService *services.DogsService) *RPCExecutor {
 	return &RPCExecutor{
 		CatService:   catService,
 		BirdsService: birdsService,
+		DogsService:  dogsService,
 	}
 }
 
@@ -38,6 +44,7 @@ func performRequest(service services.RPCService, ctx context.Context, resultChan
 		Ctx: ctx,
 	}
 	rpcResponse, err := service.RPC(rpcRequest)
+	log.Printf("RPC error calling [%T] %s\n", service, err)
 	if err != nil {
 		errChan <- err
 		return
@@ -68,7 +75,8 @@ func (RPCexecutor RPCExecutor) GetAllPets() (result *RPCResult, err error) {
 	rpcCount++
 
 	// Call GetAllDogs (AMQP)
-	//rpcCount++
+	go performRequest(RPCexecutor.DogsService, ctx, resultChan, errChan)
+	rpcCount++
 
 	// If any of them fails, stop all other RPCs and return error
 	// Keep an eye on a overall Timeout
@@ -78,6 +86,7 @@ func (RPCexecutor RPCExecutor) GetAllPets() (result *RPCResult, err error) {
 	for {
 		select {
 		case err = <-errChan:
+			cancelContext()
 			break
 		case rpcResponse := <-resultChan:
 			pets[rpcResponse.Key] = rpcResponse
@@ -94,6 +103,10 @@ func (RPCexecutor RPCExecutor) GetAllPets() (result *RPCResult, err error) {
 				return
 			}
 			err = populateBirds(pets, result)
+			if err != nil {
+				return
+			}
+			err = populateDogs(pets, result)
 			if err != nil {
 				return
 			}
@@ -117,6 +130,14 @@ func populateBirds(pets map[string]*services.RPCResponse, result *RPCResult) (er
 
 	//TODO: Yep, this is probably a bad idea. Need to make it better
 	result.Birds = pets[services.BirdServiceKey].Data.([]*birdsModels.Bird)
+	return
+
+}
+
+func populateDogs(pets map[string]*services.RPCResponse, result *RPCResult) (err error) {
+
+	//TODO: Yep, this is probably a bad idea. Need to make it better
+	result.Dogs = pets[services.BirdServiceKey].Data.([]*dogsModels.Dog)
 	return
 
 }

@@ -20,7 +20,7 @@ type CatService struct {
 
 func (service *CatService) RPC(rpcRequest *RPCRequest) (rpcResponse *RPCResponse, err error) {
 
-	log.Printf("GET for URL %s\n", service.URL)
+	log.Printf("[%T] GET for URL %s\n", service, service.URL)
 	req, err := http.NewRequest("GET", service.URL, nil)
 	if err != nil {
 		return
