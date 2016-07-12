@@ -3,7 +3,6 @@ package executor
 import (
 	"encoding/json"
 	"errors"
-	"log"
 	"time"
 
 	"golang.org/x/net/context"
@@ -77,7 +76,6 @@ func (RPCexecutor RPCExecutor) GetAllPets() (result *RPCResult, err error) {
 		case err = <-errChan:
 			break
 		case rpcResponse := <-resultChan:
-			log.Printf("%s\n", string(rpcResponse.Data))
 			pets[rpcResponse.Key] = rpcResponse
 			rpcCount--
 		case <-timeoutChan.C:
