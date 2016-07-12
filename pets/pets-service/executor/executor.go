@@ -1,31 +1,33 @@
 package executor
 
 import (
-	"encoding/json"
 	"errors"
 	"time"
 
 	"golang.org/x/net/context"
 
+	birdsModels "github.com/robertojrojas/microservices-go/pets/birds-service/models"
 	catModels "github.com/robertojrojas/microservices-go/pets/cats-service/models"
 	"github.com/robertojrojas/microservices-go/pets/pets-service/services"
 )
 
 // RPCExecutor is in charge of performing all the RPC requests.
 type RPCExecutor struct {
-	// Cat Service
 	CatService *services.CatService
-	// Bird Service
+
+	BirdsService *services.BirdService
 	// Dog Service
 }
 
 type RPCResult struct {
-	Cats []*catModels.Cat `json:"cats"`
+	Cats  []*catModels.Cat    `json:"cats"`
+	Birds []*birdsModels.Bird `json:"birds"`
 }
 
-func NewRPCExecutor(catService *services.CatService) *RPCExecutor {
+func NewRPCExecutor(catService *services.CatService, birdsService *services.BirdService) *RPCExecutor {
 	return &RPCExecutor{
-		CatService: catService,
+		CatService:   catService,
+		BirdsService: birdsService,
 	}
 }
 
@@ -53,6 +55,7 @@ func (RPCexecutor RPCExecutor) GetAllPets() (result *RPCResult, err error) {
 	resultChan := make(chan *services.RPCResponse)
 	errChan := make(chan error)
 	ctx := context.Background()
+	ctx, cancelContext := context.WithCancel(ctx)
 
 	rpcCount := 0
 
@@ -61,7 +64,8 @@ func (RPCexecutor RPCExecutor) GetAllPets() (result *RPCResult, err error) {
 	rpcCount++
 
 	// Call GetAllBirds (gRPC)
-	//rpcCount++
+	go performRequest(RPCexecutor.BirdsService, ctx, resultChan, errChan)
+	rpcCount++
 
 	// Call GetAllDogs (AMQP)
 	//rpcCount++
@@ -80,11 +84,19 @@ func (RPCexecutor RPCExecutor) GetAllPets() (result *RPCResult, err error) {
 			rpcCount--
 		case <-timeoutChan.C:
 			err = errors.New("RPCs timeout :(")
+			cancelContext()
 			break
 		}
 
 		if rpcCount == 0 {
-			populateCats(pets, result)
+			err = populateCats(pets, result)
+			if err != nil {
+				return
+			}
+			err = populateBirds(pets, result)
+			if err != nil {
+				return
+			}
 			break
 		}
 	}
@@ -95,12 +107,16 @@ func (RPCexecutor RPCExecutor) GetAllPets() (result *RPCResult, err error) {
 
 func populateCats(pets map[string]*services.RPCResponse, result *RPCResult) (err error) {
 
-	cats := []*catModels.Cat{}
-	err = json.Unmarshal(pets[services.CatServiceKey].Data, &cats)
-	if err != nil {
-		return
-	}
-	result.Cats = cats
+	//TODO: Yep, this is probably a bad idea. Need to make it better
+	result.Cats = pets[services.CatServiceKey].Data.([]*catModels.Cat)
+	return
+
+}
+
+func populateBirds(pets map[string]*services.RPCResponse, result *RPCResult) (err error) {
+
+	//TODO: Yep, this is probably a bad idea. Need to make it better
+	result.Birds = pets[services.BirdServiceKey].Data.([]*birdsModels.Bird)
 	return
 
 }

@@ -13,7 +13,10 @@ func main() {
 	catService := &services.CatService{
 		URL: "http://localhost:8091/api/cats",
 	}
-	rpcExecutor := executor.NewRPCExecutor(catService)
+	birdsService := &services.BirdService{
+		ServiceAddress: "localhost:8092",
+	}
+	rpcExecutor := executor.NewRPCExecutor(catService, birdsService)
 	results, err := rpcExecutor.GetAllPets()
 	if err != nil {
 		log.Fatal(err)

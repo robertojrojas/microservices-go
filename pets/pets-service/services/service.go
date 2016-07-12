@@ -8,7 +8,7 @@ type RPCRequest struct {
 
 type RPCResponse struct {
 	Key  string
-	Data []byte
+	Data interface{}
 }
 
 // RPCService is an abstraction of the

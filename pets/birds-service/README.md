@@ -1,6 +1,8 @@
 
+docker run --name some-postgres -v `pwd`/datadir:/var/lib/postgresql/data -p 5432:5432 -e POSTGRES_PASSWORD=mysecretpassword -d postgres
 
-CREATE ROLE 'birdman' WITH PASSWORD 'mycape'  LOGIN INHERIT  VALID UNTIL 'infinity';
+
+CREATE ROLE "birdman" WITH PASSWORD 'mycape'  LOGIN INHERIT  VALID UNTIL 'infinity';
 
 
 CREATE DATABASE birddb
@@ -8,19 +10,24 @@ CREATE DATABASE birddb
        OWNER=birdman
        CONNECTION LIMIT=-1;  
 
-CREATE TABLE birds(
- bird_id serial PRIMARY KEY,
- bird_name VARCHAR (50) UNIQUE NOT NULL,
- bird_age  integer NOT NULL,
- bird_type VARCHAR (50) NOT NULL 
+CREATE TABLE public.birds
+(
+  bird_id serial NOT NULL,
+  bird_name character varying(50) NOT NULL,
+  bird_age integer NOT NULL,
+  bird_type character varying(50) NOT NULL,
+  CONSTRAINT birds_pkey PRIMARY KEY (bird_id),
+  CONSTRAINT birds_bird_name_key UNIQUE (bird_name)
+)
+WITH (
+  OIDS=FALSE
 );
-
-ALTER TABLE birds
-  OWNER TO birdman;        
+ALTER TABLE public.birds
+  OWNER TO birdman;
         
 INSERT INTO birds( bird_name, bird_age, bird_type)
     VALUES ('first', 2, 'BLACKBIRD'); 
 INSERT INTO birds( bird_name, bird_age, bird_type)
-    VALUES ('first', 5, 'NUTHATCHESOWL'); 
+    VALUES ('second', 5, 'NUTHATCHESOWL'); 
 INSERT INTO birds( bird_name, bird_age, bird_type)
-    VALUES ('first', 2, 'DOVESDUCK');   
+    VALUES ('third', 2, 'DOVESDUCK');   

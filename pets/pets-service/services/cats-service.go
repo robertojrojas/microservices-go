@@ -1,10 +1,12 @@
 package services
 
 import (
+	"encoding/json"
 	"io/ioutil"
 	"log"
 	"net/http"
 
+	catModels "github.com/robertojrojas/microservices-go/pets/cats-service/models"
 	"golang.org/x/net/context"
 )
 
@@ -31,11 +33,17 @@ func (service *CatService) RPC(rpcRequest *RPCRequest) (rpcResponse *RPCResponse
 			return err
 		}
 		defer resp.Body.Close()
-		rpcResponse.Data, err = ioutil.ReadAll(resp.Body)
+		data, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
 			return err
 		}
-		log.Printf("data: %v %s\n", err, rpcResponse.Data)
+
+		cats := []*catModels.Cat{}
+		err = json.Unmarshal(data, &cats)
+		if err != nil {
+			return err
+		}
+		rpcResponse.Data = cats
 
 		return nil
 	})
