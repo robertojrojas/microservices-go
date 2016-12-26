@@ -1,0 +1,4 @@
+FROM alpine:3.4
+MAINTAINER Roberto J. Rojas <robertojrojas@gmail.com>
+ADD dogs-service /usr/bin/dogs-service
+ENTRYPOINT ["dogs-service"]
