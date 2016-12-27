@@ -9,7 +9,7 @@ endif
 
 BUILD_TIME=`date +%FT%T%z`
 
-LDFLAGS=-ldflags "-X main.Version=${VERSION} -X main.BuildTime=${BUILD_TIME}" -a -tags netgo -ldflags '-w' 
+LDFLAGS=-a -tags netgo -ldflags "-X main.Version=${VERSION} -X main.BuildTime=${BUILD_TIME} -w" 
 
 .DEFAULT_GOAL: $(BINARY)
 

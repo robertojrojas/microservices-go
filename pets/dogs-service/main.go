@@ -26,6 +26,30 @@ type config struct {
 	mongoDBCollection string
 }
 
+func main() {
+
+	log.Printf("%s\n", getVersion())
+
+	envConfig := getConfig()
+	log.Printf("%#v\n", envConfig)
+
+	dogMongoStore, err := models.NewDogMongoStore(envConfig.mongoDBURI, envConfig.mongoDBName, envConfig.mongoDBCollection)
+	checkErr(err, "connecting to MongoDB")
+	defer dogMongoStore.Disconnect()
+
+	messageHanlder := messaging.NewMessageHandler(dogMongoStore)
+	amqpManager := messaging.NewAMQManager(envConfig.rabbitMQURI, envConfig.rabbitMQQueue, messageHanlder)
+	err = amqpManager.Connect()
+	checkErr(err, "connecting to RabbitMQ")
+
+	defer amqpManager.Disconnect()
+
+	log.Println("Ready to receive messages...")
+	err = amqpManager.WaitForMessages()
+	checkErr(err, "receive messages from RabbitMQ")
+
+}
+
 func getConfig() *config {
 
 	envConfig := config{}
@@ -58,29 +82,6 @@ func getConfig() *config {
 	return &envConfig
 }
 
-func main() {
-
-	log.Printf("%s\n", getVersion())
-
-	envConfig := getConfig()
-	log.Printf("%#v\n", envConfig)
-
-	dogMongoStore, err := models.NewDogMongoStore(envConfig.mongoDBURI, envConfig.mongoDBName, envConfig.mongoDBCollection)
-	checkErr(err, "connecting to MongoDB")
-	defer dogMongoStore.Disconnect()
-
-	messageHanlder := messaging.NewMessageHandler(dogMongoStore)
-	amqpManager := messaging.NewAMQManager(envConfig.rabbitMQURI, envConfig.rabbitMQQueue, messageHanlder)
-	err = amqpManager.Connect()
-	checkErr(err, "connecting to RabbitMQ")
-
-	defer amqpManager.Disconnect()
-
-	log.Println("Ready to receive messages...")
-	err = amqpManager.WaitForMessages()
-	checkErr(err, "receive messages from RabbitMQ")
-
-}
 func checkErr(err error, message string) {
 	if err != nil {
 		log.Fatalf("error: %s - %s", message, err)

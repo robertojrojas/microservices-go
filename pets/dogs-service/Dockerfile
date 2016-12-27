@@ -9,4 +9,4 @@ ENV MONGODB_URI mongodb://localhost:27017
 ENV MONGODB_DBNAME dogsDB
 ENV MONGODB_COLLECTION dogs
 
-#ENTRYPOINT ["dogs-service"]
+ENTRYPOINT ["dogs-service"]
