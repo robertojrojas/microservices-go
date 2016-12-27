@@ -1,8 +1,6 @@
 package models
 
 import (
-	"log"
-
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -15,21 +13,20 @@ type DogMongoStore struct {
 	Session        *mgo.Session
 }
 
-func NewDogMongoStore(mongoDBURL, DBName, CollectionName string) *DogMongoStore {
-	session := connectToMongoDB(mongoDBURL)
+func NewDogMongoStore(mongoDBURL, DBName, CollectionName string) (*DogMongoStore, error) {
+	session, err := connectToMongoDB(mongoDBURL)
+	if err != nil {
+		return nil, err
+	}
 	return &DogMongoStore{
 		Session:        session,
 		DBName:         DBName,
 		CollectionName: CollectionName,
-	}
+	}, nil
 }
 
-func connectToMongoDB(mongoDBURL string) (session *mgo.Session) {
-	session, err := mgo.Dial(mongoDBURL)
-	if err != nil {
-		log.Fatal(err)
-	}
-
+func connectToMongoDB(mongoDBURL string) (session *mgo.Session, err error) {
+	session, err = mgo.Dial(mongoDBURL)
 	return
 
 }
