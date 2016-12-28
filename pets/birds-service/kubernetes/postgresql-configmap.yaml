@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgresql-config
+  namespace: default
+data:
+  postgresql.uri: postgres://birdman:mycape@10.0.1.122/pqgotest?sslmode=disable

@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mongodb-config
+  namespace: default
+data:
+  mongodb.uri: mongodb://10.0.1.122:27017
+  mongodb.dbname: dogsDB
+  mongodb.collection: dogs

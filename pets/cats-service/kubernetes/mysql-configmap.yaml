@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-config
+  namespace: default
+data:
+  mysql.uri: root:my-secret-pw@tcp(10.0.1.122:3306)/cats_db
