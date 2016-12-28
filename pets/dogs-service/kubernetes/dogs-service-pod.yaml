@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: dogs-service
+  labels:
+    app: dogs-service
+spec:
+  containers:
+  - name: dogs-service
+    image: robertojrojas/dogs-service:0.1
+    env:
+      - name: RABBITMQ_URI
+        valueFrom:
+          configMapKeyRef:
+            name: rabbitmq-config
+            key: rabbitmq.uri
+      - name: RABBITMQ_QUEUE
+        valueFrom:
+          configMapKeyRef:
+            name: rabbitmq-config
+            key: rabbitmq.queue
+      - name: MONGODB_URI
+        valueFrom:
+          configMapKeyRef:
+            name: mongodb-config
+            key: mongodb.uri
+      - name: MONGODB_DBNAME
+        valueFrom:
+          configMapKeyRef:
+            name: mongodb-config
+            key: mongodb.dbname
+      - name: MONGODB_COLLECTION
+        valueFrom:
+          configMapKeyRef:
+            name: mongodb-config
+            key: mongodb.collection
+
+    resources:
+      limits:
+        cpu: "0.1"
+        memory: "10Mi"
