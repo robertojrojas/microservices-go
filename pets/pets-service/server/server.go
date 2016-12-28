@@ -57,7 +57,7 @@ func StartServer(serverHostPort string) error {
 func (s *PetsServer) petsHandler(w http.ResponseWriter, r *http.Request) {
 	results, err := s.rpcExecutor.GetAllPets()
 	if err != nil {
-		log.Fatal(err)
+		fmt.Fprintf(w, "Unable to get all pets %s\n", err)
 	}
 
 	output, err := json.Marshal(results)

@@ -33,7 +33,7 @@ func main() {
 		select {
 		case err := <-errChan:
 			if err != nil {
-				log.Fatal(err)
+				log.Fatalf("Error Starting PetsService: %s", err)
 			}
 		case s := <-signalChan:
 			log.Println(fmt.Sprintf("Captured %v. Exciting...", s))
