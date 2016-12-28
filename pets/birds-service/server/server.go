@@ -9,6 +9,7 @@ import (
 	pb "github.com/robertojrojas/microservices-go/pets/birds-service/models"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
+	"os"
 )
 
 // server is used to implement birds-service Server.
@@ -16,13 +17,34 @@ type server struct {
 	birdsDBStore pb.BirdsDataStore
 }
 
+type config struct {
+	postgreSQLDBURI string
+}
+
 var serverHostPort string
-var dbURL *string
+
 
 func init() {
+	flag.StringVar(&serverHostPort, "http", ":8092", "Host and port server listens on")
+}
 
-	dbURL = flag.String("dbURL", "user=birdman password=mycape dbname=birddb sslmode=disable", "DB URL for PostgreSQL")
-	flag.StringVar(&serverHostPort, "serverHostPort", ":8092", "Host and port server listens on")
+
+// StartServer configures and starts API Server
+func StartServer() error {
+
+	config := getConfig()
+
+	birdsDB := pb.NewBirdsDB(config.postgreSQLDBURI)
+	birdServer := NewBirdsServer(birdsDB)
+
+	lis, err := net.Listen("tcp", serverHostPort)
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+	log.Printf("Listening on [%s]....\n", serverHostPort)
+	s := grpc.NewServer()
+	pb.RegisterBirdRepositoryServer(s, birdServer)
+	return s.Serve(lis)
 
 }
 
@@ -32,6 +54,7 @@ func NewBirdsServer(dataStore pb.BirdsDataStore) *server {
 		birdsDBStore: dataStore,
 	}
 }
+
 
 func (s *server) AllBirds(ctx context.Context, in *pb.Empty) (birdCatalog *pb.BirdCatalog, err error) {
 
@@ -102,19 +125,14 @@ func (s *server) DeleteBird(ctx context.Context, in *pb.BirdId) (*pb.Empty, erro
 
 }
 
-// StartServer configures and starts API Server
-func StartServer() error {
+func getConfig() *config {
 
-	birdsDB := pb.NewBirdsDB(*dbURL)
-	birdServer := NewBirdsServer(birdsDB)
+	envConfig := config{}
 
-	lis, err := net.Listen("tcp", serverHostPort)
-	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+	envConfig.postgreSQLDBURI = os.Getenv("POSTGRESQL_DB_URI")
+	if envConfig.postgreSQLDBURI == "" {
+		envConfig.postgreSQLDBURI = "user=birdman password=mycape dbname=birddb sslmode=disable"
 	}
-	log.Printf("Listening on [%s]....\n", serverHostPort)
-	s := grpc.NewServer()
-	pb.RegisterBirdRepositoryServer(s, birdServer)
-	return s.Serve(lis)
 
+	return &envConfig
 }

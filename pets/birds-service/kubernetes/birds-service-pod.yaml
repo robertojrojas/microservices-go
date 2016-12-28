@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: birds-service
+  labels:
+    app: birds-service
+spec:
+  containers:
+  - name: birds-service
+    image: robertojrojas/birds-service:0.1
+    args:
+      - "-http=0.0.0.0:8092"
+    env:
+      - name: POSTGRESQL_DB_URI
+        valueFrom:
+          configMapKeyRef:
+            name: postgresql-config
+            key: postgresql.uri
+    resources:
+      limits:
+        cpu: "0.1"
+        memory: "10Mi"
