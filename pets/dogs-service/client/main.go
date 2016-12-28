@@ -15,6 +15,8 @@ import (
 )
 
 var (
+	uri         = flag.String("uri", "amqp://guest:guest@localhost:5672/", "AMQP URI")
+	queue       = flag.String("queue", "dog_service_rpc_queue", "Queue to get RPC messages from")
 	requestType = flag.Int("requestType", 0, "RPC Request Type")
 	dogID       = flag.String("dogID", "", "Dog ID to query for")
 )
@@ -38,7 +40,7 @@ func randInt(min int, max int) int {
 }
 
 func readAllRPC() (err error) {
-	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
+	conn, err := amqp.Dial(*uri)
 	failOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
 
@@ -76,7 +78,7 @@ func readAllRPC() (err error) {
 
 	err = ch.Publish(
 		"", // exchange
-		"dog_service_rpc_queue", // routing key
+		*queue, // routing key
 		false, // mandatory
 		false, // immediate
 		amqp.Publishing{
