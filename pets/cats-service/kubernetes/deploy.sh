@@ -1,3 +1,3 @@
-kubectl create -f mysql-config.yaml
-kubectl create -f cats-service-pod.yaml
-kubectl create -f cats-service-svc.yaml
+kubectl create -f mysql-config.yml
+kubectl create -f cats-service-pod.yml
+kubectl create -f cats-service-svc.yml

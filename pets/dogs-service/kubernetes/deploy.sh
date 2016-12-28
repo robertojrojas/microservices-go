@@ -1,3 +1,3 @@
-kubectl create -f rabbitmq-configmap.yaml
-kubectl create -f mongodb-configmap.yaml
-kubectl create -f dogs-service-pod.yaml
+kubectl create -f rabbitmq-configmap.yml
+kubectl create -f mongodb-configmap.yml
+kubectl create -f dogs-service-pod.yml
