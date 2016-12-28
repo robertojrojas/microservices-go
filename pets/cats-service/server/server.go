@@ -14,7 +14,7 @@ import (
 var serverHostPort string
 
 func init() {
-	flag.StringVar(&serverHostPort, "serverHostPort", ":8091", "Host and port server listens on")
+	flag.StringVar(&serverHostPort, "http", ":8091", "Host and port server listens on")
 }
 
 type config struct {

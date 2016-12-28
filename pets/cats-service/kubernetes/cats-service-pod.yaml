@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: cats-service
+  labels:
+    app: cats-service
+spec:
+  containers:
+  - name: cats-service
+    image: robertojrojas/cats-service:0.1
+    args:
+      - "-http=0.0.0.0:8091"
+    env:
+      - name: MYSQL_DB_URI
+        valueFrom:
+          configMapKeyRef:
+            name: mysql-config
+            key: mysql.uri
+    resources:
+      limits:
+        cpu: "0.1"
+        memory: "10Mi"
