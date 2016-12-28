@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: petss-service
+  labels:
+    app: petss-service
+spec:
+  containers:
+  - name: petss-service
+    image: robertojrojas/petss-service:0.1
+    args:
+      - "-http=0.0.0.0:8094"
+    ports:
+      - containerPort: 8094
+    env:
+      - name: RABBITMQ_URI
+        valueFrom:
+          configMapKeyRef:
+            name: rabbitmq-config
+            key: rabbitmq.uri
+      - name: RABBITMQ_QUEUE
+        valueFrom:
+          configMapKeyRef:
+            name: rabbitmq-config
+            key: rabbitmq.queue
+      - name: CATS_SERVICE_URI
+          valueFrom:
+            configMapKeyRef:
+              name: cats-service-config
+              key: cats.service.uri
+      - name: BIRDS_SERVICE_URI
+          valueFrom:
+            configMapKeyRef:
+              name: birds-service-config
+              key: birds.service.uri
+    resources:
+      limits:
+        cpu: "0.1"
+        memory: "10Mi"

@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cats-service-config
+  namespace: default
+data:
+  cats.service.uri: http://cats-service-svc:8091/api/cats

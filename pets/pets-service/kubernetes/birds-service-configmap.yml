@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: birds-service-config
+  namespace: default
+data:
+  birds.service.uri: birds-service-svc:8092
