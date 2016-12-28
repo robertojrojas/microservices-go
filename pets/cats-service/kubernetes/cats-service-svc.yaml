@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: cats-service-svc
+spec:
+  ports:
+  - port: 8091
+    protocol: TCP
+  selector:
+    app: cats-service
+  type: NodePort

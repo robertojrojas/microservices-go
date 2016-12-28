@@ -10,6 +10,8 @@ spec:
     image: robertojrojas/cats-service:0.1
     args:
       - "-http=0.0.0.0:8091"
+    ports:
+      - containerPort: 8091
     env:
       - name: MYSQL_DB_URI
         valueFrom:
