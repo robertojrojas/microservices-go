@@ -8,23 +8,25 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/robertojrojas/microservices-go/pets/cats-service/models"
 	"github.com/robertojrojas/microservices-go/pets/cats-service/routes"
+	"os"
 )
 
 var serverHostPort string
-var dbURL *string
 
 func init() {
-
-	dbURL = flag.String("dbURL", "root:my-secret-pw@tcp(:3306)/cats_db", "DB URL including database")
 	flag.StringVar(&serverHostPort, "serverHostPort", ":8091", "Host and port server listens on")
+}
 
+type config struct {
+	mySQLDBURI string
 }
 
 // StartServer configures and starts API Server
 func StartServer() error {
 
+	config := getConfig()
 	router := mux.NewRouter()
-	catsDB := models.NewCatsDB(*dbURL)
+	catsDB := models.NewCatsDB(config.mySQLDBURI)
 	catsRoutes := routes.NewCatsRoutes(catsDB)
 	router.HandleFunc("/api/cats", catsRoutes.ReadAllHandler).Methods("GET")
 	router.HandleFunc("/api/cats", catsRoutes.CreateHandler).Methods("POST")
@@ -35,4 +37,16 @@ func StartServer() error {
 
 	log.Printf("Listening on [%s]....\n", serverHostPort)
 	return http.ListenAndServe(serverHostPort, nil)
+}
+
+func getConfig() *config {
+
+	envConfig := config{}
+
+	envConfig.mySQLDBURI = os.Getenv("MYSQL_DB_URI")
+	if envConfig.mySQLDBURI == "" {
+		envConfig.mySQLDBURI = "root:my-secret-pw@tcp(:3306)/cats_db"
+	}
+
+	return &envConfig
 }

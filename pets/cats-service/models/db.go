@@ -98,10 +98,10 @@ func (dbWrapper *catsDB) ReadCat(id int64) (cat *Cat, err error) {
 	err = dbWrapper.db.QueryRow(
 		"select cat_id, cat_name, cat_age, cat_type from cats where cat_id=?", id).
 		Scan(
-		&cat.ID,
-		&cat.Name,
-		&cat.Age,
-		&cat.Type)
+			&cat.ID,
+			&cat.Name,
+			&cat.Age,
+			&cat.Type)
 	switch {
 	case err == sql.ErrNoRows:
 		cat = nil
