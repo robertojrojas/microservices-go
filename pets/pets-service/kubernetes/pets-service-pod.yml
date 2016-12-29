@@ -23,21 +23,21 @@ spec:
           configMapKeyRef:
             name: rabbitmq-config
             key: rabbitmq.queue
-       - name: REDIS_URI
-          valueFrom:
-            configMapKeyRef:
-              name: redis-config
-              key: redis.uri
+      - name: REDIS_URI
+        valueFrom:
+          configMapKeyRef:
+            name: redis-config
+            key: redis.uri
       - name: CATS_SERVICE_URI
-          valueFrom:
-            configMapKeyRef:
-              name: cats-service-config
-              key: cats.service.uri
+        valueFrom:
+          configMapKeyRef:
+            name: cats-service-config
+            key: cats.service.uri
       - name: BIRDS_SERVICE_URI
-          valueFrom:
-            configMapKeyRef:
-              name: birds-service-config
-              key: birds.service.uri
+        valueFrom:
+          configMapKeyRef:
+            name: birds-service-config
+            key: birds.service.uri
     resources:
       limits:
         cpu: "0.1"

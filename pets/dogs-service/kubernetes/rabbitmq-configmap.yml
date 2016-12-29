@@ -4,5 +4,5 @@ metadata:
   name: rabbitmq-config
   namespace: default
 data:
-  rabbitmq.uri: amqp://guest:guest@10.0.1.122:5673/
+  rabbitmq.uri: amqp://guest:guest@10.0.1.122:5672/
   rabbitmq.queue: dog_service_rpc_queue

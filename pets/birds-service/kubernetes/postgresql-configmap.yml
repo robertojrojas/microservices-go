@@ -4,4 +4,4 @@ metadata:
   name: postgresql-config
   namespace: default
 data:
-  postgresql.uri: postgres://birdman:mycape@10.0.1.122/pqgotest?sslmode=disable
+  postgresql.uri: postgres://birdman:mycape@10.0.1.122/birddb?sslmode=disable
