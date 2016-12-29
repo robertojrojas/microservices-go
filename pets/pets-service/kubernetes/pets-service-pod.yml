@@ -23,6 +23,11 @@ spec:
           configMapKeyRef:
             name: rabbitmq-config
             key: rabbitmq.queue
+       - name: REDIS_URI
+          valueFrom:
+            configMapKeyRef:
+              name: redis-config
+              key: redis.uri
       - name: CATS_SERVICE_URI
           valueFrom:
             configMapKeyRef:

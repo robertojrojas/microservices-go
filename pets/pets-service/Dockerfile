@@ -5,6 +5,7 @@ ADD pets-service /usr/bin/pets-service
 
 ENV RABBITMQ_URI amqp://guest:guest@localhost:5672/
 ENV RABBITMQ_QUEUE dog_service_rpc_queue
+ENV REDIS_URI ":6379"
 ENV CATS_SERVICE_URI http://cats-service-svc:8091/api/cats
 ENV BIRDS_SERVICE_URI birds-service-svc:8092
 

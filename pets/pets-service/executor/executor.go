@@ -44,8 +44,8 @@ func performRequest(service services.RPCService, ctx context.Context, resultChan
 		Ctx: ctx,
 	}
 	rpcResponse, err := service.RPC(rpcRequest)
-	log.Printf("RPC error calling [%T] %s\n", service, err)
 	if err != nil {
+		log.Printf("RPC error calling [%T] [%#v] %s\n", service, rpcResponse, err)
 		errChan <- err
 		return
 	}
@@ -137,7 +137,7 @@ func populateBirds(pets map[string]*services.RPCResponse, result *RPCResult) (er
 func populateDogs(pets map[string]*services.RPCResponse, result *RPCResult) (err error) {
 
 	//TODO: Yep, this is probably a bad idea. Need to make it better
-	result.Dogs = pets[services.BirdServiceKey].Data.([]*dogsModels.Dog)
+	result.Dogs = pets[services.DogsServiceKey].Data.([]*dogsModels.Dog)
 	return
 
 }

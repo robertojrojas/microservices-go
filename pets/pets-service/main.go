@@ -29,6 +29,8 @@ func main() {
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
 
+	log.Printf("Pets Service listenning on %s\n", serverHostPort)
+
 	for {
 		select {
 		case err := <-errChan:

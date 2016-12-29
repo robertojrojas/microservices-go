@@ -8,12 +8,17 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/robertojrojas/microservices-go/pets/pets-service/executor"
 	"github.com/robertojrojas/microservices-go/pets/pets-service/services"
+	"github.com/robertojrojas/microservices-go/pets/pets-service/cache"
 	"net/http"
 	"os"
+	"io"
 )
+
+const cacheKey = "PETS-SVC:ALLPETS"
 
 type PetsServer struct {
 	rpcExecutor *executor.RPCExecutor
+        cache 	*cache.RedisCache
 }
 
 type config struct {
@@ -21,12 +26,17 @@ type config struct {
 	birdsServiceURI string
 	rabbitMQURI     string
 	rabbitMQQueue   string
+	redisURI        string
 }
 
 // StartServer configures and starts API Server
 func StartServer(serverHostPort string) error {
-
 	appConfig := getConfig()
+
+	redisCache, err := cache.NewRedisCache(appConfig.redisURI)
+	if err != nil {
+		return err
+	}
 
 	catService := &services.CatService{
 		URL: appConfig.catsServiceURI,
@@ -43,6 +53,7 @@ func StartServer(serverHostPort string) error {
 
 	petsServer := &PetsServer{
 		rpcExecutor: rpcExecutor,
+		cache: redisCache,
 	}
 
 	router := mux.NewRouter()
@@ -50,23 +61,46 @@ func StartServer(serverHostPort string) error {
 
 	http.Handle("/", router)
 
-	log.Printf("Listening on [%s]....\n", serverHostPort)
 	return http.ListenAndServe(serverHostPort, nil)
 }
 
 func (s *PetsServer) petsHandler(w http.ResponseWriter, r *http.Request) {
-	results, err := s.rpcExecutor.GetAllPets()
+	err := getAllPets(s, w)
 	if err != nil {
-		fmt.Fprintf(w, "Unable to get all pets %s\n", err)
-	}
-
-	output, err := json.Marshal(results)
-	if err != nil {
-		fmt.Fprintf(w, "Unable to marshal output %s\n", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+}
 
-	fmt.Fprintf(w, "%s\n", output)
+func getAllPets(s *PetsServer, w io.Writer) (error) {
+
+	// For now we ignore errors from cache since
+	// the read source of the data is the rpcExecutor
+	allPets, _ := s.cache.Get(cacheKey)
+
+	if allPets == "" {
+		log.Println("No Pets found in cache. Querying sources....")
+		results, err := s.rpcExecutor.GetAllPets()
+		if err != nil {
+			return err
+		}
+
+		data, err := json.Marshal(&results)
+		if err != nil {
+			return err
+		}
+		allPets = string(data)
+		err = s.cache.StoreWithDefaultTTL(cacheKey, allPets)
+		if err != nil {
+			return err
+		}
+	} else {
+		log.Println("Pets found in cache")
+	}
+
+	fmt.Fprintf(w, "%s\n", allPets)
+
+	return nil
 }
 
 func getConfig() *config {
@@ -81,6 +115,11 @@ func getConfig() *config {
 	envConfig.rabbitMQQueue = os.Getenv("RABBITMQ_QUEUE")
 	if envConfig.rabbitMQQueue == "" {
 		envConfig.rabbitMQQueue = "dog_service_rpc_queue"
+	}
+
+	envConfig.redisURI = os.Getenv("REDIS_URI")
+	if envConfig.redisURI == "" {
+		envConfig.redisURI = ":6379"
 	}
 
 	envConfig.catsServiceURI = os.Getenv("CATS_SERVICE_URI")

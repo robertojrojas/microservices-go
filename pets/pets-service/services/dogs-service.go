@@ -27,7 +27,6 @@ func (service *DogsService) RPC(rpcRequest *RPCRequest) (rpcResponse *RPCRespons
 		return
 	}
 	defer conn.Close()
-	log.Println("Getting Channel...")
 
 	ch, err := conn.Channel()
 	if err != nil {
@@ -85,7 +84,6 @@ func (service *DogsService) RPC(rpcRequest *RPCRequest) (rpcResponse *RPCRespons
 	if err != nil {
 		return
 	}
-	log.Println("Listening...")
 	for d := range msgs {
 		rpcReply := &messaging.RPCMessage{}
 		err = json.Unmarshal(d.Body, rpcReply)
