@@ -7,7 +7,7 @@ metadata:
 spec:
   containers:
   - name: birds-service
-    image: robertojrojas/birds-service:0.1
+    image: robertojrojas/birds-service:0.2
     args:
       - "-http=0.0.0.0:8092"
     ports:
