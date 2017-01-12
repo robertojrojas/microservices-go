@@ -9,4 +9,6 @@ ENV REDIS_URI "localhost:6379"
 ENV CATS_SERVICE_URI http://cats-service-svc:8091/api/cats
 ENV BIRDS_SERVICE_URI birds-service-svc:8092
 
+EXPOSE 8094
+
 ENTRYPOINT ["pets-service"]

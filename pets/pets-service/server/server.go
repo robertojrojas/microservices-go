@@ -12,9 +12,12 @@ import (
 	"net/http"
 	"os"
 	"io"
+	"time"
 )
 
 const cacheKey = "PETS-SVC:ALLPETS"
+const cacheTTL = 30 * time.Second
+
 
 type PetsServer struct {
 	rpcExecutor *executor.RPCExecutor
@@ -76,9 +79,9 @@ func getAllPets(s *PetsServer, w io.Writer) (error) {
 
 	// For now we ignore errors from cache since
 	// the read source of the data is the rpcExecutor
-	allPets, _ := s.cache.Get(cacheKey)
+	allPetsJSON, _ := s.cache.Get(cacheKey)
 
-	if allPets == "" {
+	if allPetsJSON == "" {
 		log.Println("No Pets found in cache. Querying sources....")
 		results, err := s.rpcExecutor.GetAllPets()
 		if err != nil {
@@ -89,8 +92,8 @@ func getAllPets(s *PetsServer, w io.Writer) (error) {
 		if err != nil {
 			return err
 		}
-		allPets = string(data)
-		err = s.cache.StoreWithDefaultTTL(cacheKey, allPets)
+		allPetsJSON = string(data)
+		err = s.cache.Store(cacheKey, allPetsJSON, cacheTTL)
 		if err != nil {
 			return err
 		}
@@ -98,7 +101,7 @@ func getAllPets(s *PetsServer, w io.Writer) (error) {
 		log.Println("Pets found in cache")
 	}
 
-	fmt.Fprintf(w, "%s\n", allPets)
+	fmt.Fprintf(w, "%s\n", allPetsJSON)
 
 	return nil
 }

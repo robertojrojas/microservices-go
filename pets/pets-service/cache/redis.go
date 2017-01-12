@@ -38,7 +38,7 @@ func (c *RedisCache) Get(key string) (string, error) {
 }
 
 func (c *RedisCache) StoreWithDefaultTTL(key string, value string) error {
-	return c.redisClient.Set(key, value, defaultTTL).Err()
+	return c.Store(key, value, defaultTTL)
 }
 
 func (c *RedisCache) Store(key string, value string, expiration time.Duration) error {

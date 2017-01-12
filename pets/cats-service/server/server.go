@@ -27,7 +27,9 @@ func StartServer() error {
 	config := getConfig()
 	router := mux.NewRouter()
 	catsDB := models.NewCatsDB(config.mySQLDBURI)
+
 	catsRoutes := routes.NewCatsRoutes(catsDB)
+
 	router.HandleFunc("/api/cats", catsRoutes.ReadAllHandler).Methods("GET")
 	router.HandleFunc("/api/cats", catsRoutes.CreateHandler).Methods("POST")
 	router.HandleFunc("/api/cats/{id:[0-9]+}", catsRoutes.ReadHandler).Methods("GET")

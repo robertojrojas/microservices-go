@@ -21,7 +21,7 @@ type DogsService struct {
 
 func (service *DogsService) RPC(rpcRequest *RPCRequest) (rpcResponse *RPCResponse, err error) {
 
-	log.Printf("[%T] Using for ServiceAddress %s RPCQueue %s\n", service, service.ServiceAddress, service.RPCQueue)
+	log.Printf("[%T] Using ServiceAddress %s RPCQueue %s\n", service, service.ServiceAddress, service.RPCQueue)
 	conn, err := amqp.Dial(service.ServiceAddress)
 	if err != nil {
 		return

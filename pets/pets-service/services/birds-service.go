@@ -19,17 +19,19 @@ type BirdService struct {
 func (service *BirdService) RPC(rpcRequest *RPCRequest) (rpcResponse *RPCResponse, err error) {
 
 	// Set up a connection to the server.
-	log.Printf("[%T] Using for ServiceAddress %s\n", service, service.ServiceAddress)
+	log.Printf("[%T] Using ServiceAddress %s\n", service, service.ServiceAddress)
 	conn, err := grpc.Dial(service.ServiceAddress, grpc.WithInsecure())
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		log.Fatalf("unable to connect to bird service: %v", err)
+		return nil, err
 	}
 	defer conn.Close()
 	c := pb.NewBirdRepositoryClient(conn)
 
 	r, err := c.AllBirds(rpcRequest.Ctx, &pb.Empty{})
 	if err != nil {
-		log.Fatalf("could not greet: %v", err)
+		log.Fatalf("could not query bird service: %v", err)
+		return nil, err
 	}
 
 	rpcResponse = &RPCResponse{

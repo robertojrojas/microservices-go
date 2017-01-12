@@ -3,7 +3,7 @@ MAINTAINER Roberto J. Rojas <robertojrojas@gmail.com>
 
 ADD birds-service /usr/bin/birds-service
 
-ENV POSTGRESQL_DB_URI "user=birdman password=mycape dbname=birddb sslmode=disable"
+ENV POSTGRESQL_DB_URI postgres://birdman:mycape@localhost/birddb?sslmode=disable
 
 EXPOSE 8092
 
