@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 
-	catModels "github.com/robertojrojas/microservices-go/pets/cats-service/models"
+	catModels "github.com/robertojrojas/microservices-go/pets/cats-service/api"
 	"golang.org/x/net/context"
 )
 

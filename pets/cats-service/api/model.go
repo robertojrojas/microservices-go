@@ -1,4 +1,4 @@
-package models
+package api
 
 import (
 	"database/sql"
@@ -7,6 +7,31 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 )
+
+
+type DB interface {
+	Query(query string, args ...interface{}) (*sql.Rows, error)
+	Prepare(query string) (*sql.Stmt, error)
+	QueryRow(query string, args ...interface{}) *sql.Row
+}
+
+// Cat data
+type Cat struct {
+	ID   int64  `json:"id"    db:"cat_id"`
+	Name string `json:"name"  db:"cat_name"`
+	Age  int    `json:"age"   db:"cat_age"`
+	Type string `json:"type"  db:"cat_type"`
+}
+
+// CatsDataStore represents interface to manage cats
+type CatsDataStore interface {
+	ReadAllCats() (cats []*Cat, err error)
+	CreateCat(cat *Cat) (err error)
+	ReadCat(id int64) (cat *Cat, err error)
+	UpdateCat(cat *Cat) (err error)
+	DeleteCat(id int64) (err error)
+}
+
 
 type catsDB struct {
 	CatsDataStore
@@ -98,10 +123,10 @@ func (dbWrapper *catsDB) ReadCat(id int64) (cat *Cat, err error) {
 	err = dbWrapper.db.QueryRow(
 		"select cat_id, cat_name, cat_age, cat_type from cats where cat_id=?", id).
 		Scan(
-			&cat.ID,
-			&cat.Name,
-			&cat.Age,
-			&cat.Type)
+		&cat.ID,
+		&cat.Name,
+		&cat.Age,
+		&cat.Type)
 	switch {
 	case err == sql.ErrNoRows:
 		cat = nil
@@ -145,3 +170,4 @@ func (dbWrapper *catsDB) DeleteCat(id int64) (err error) {
 
 	return
 }
+

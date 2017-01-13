@@ -8,8 +8,10 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/robertojrojas/microservices-go/pets/cats-service/server"
+	"github.com/robertojrojas/microservices-go/pets/cats-service/api"
+	"errors"
 )
+
 
 func main() {
 
@@ -18,22 +20,24 @@ func main() {
 	errChan := make(chan error, 1)
 
 	go func() {
-		errChan <- server.StartServer()
+		errChan <- api.StartServer()
 	}()
 
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
+	err := shutdownHook(signalChan, errChan)
+	log.Fatal(err)
 
+
+}
+
+func shutdownHook(signalChan chan os.Signal, errChan chan error) error {
 	for {
 		select {
 		case err := <-errChan:
-			if err != nil {
-				log.Fatal(err)
-			}
+			return err
 		case s := <-signalChan:
-			log.Println(fmt.Sprintf("Captured %v. Exciting...", s))
-			os.Exit(0)
+			return errors.New(fmt.Sprintf("Captured %v. Exciting...", s))
 		}
 	}
-
 }

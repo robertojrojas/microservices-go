@@ -8,7 +8,7 @@ import (
 	"golang.org/x/net/context"
 
 	birdsModels "github.com/robertojrojas/microservices-go/pets/birds-service/models"
-	catModels "github.com/robertojrojas/microservices-go/pets/cats-service/models"
+	catModels "github.com/robertojrojas/microservices-go/pets/cats-service/api"
 	dogsModels "github.com/robertojrojas/microservices-go/pets/dogs-service/models"
 	"github.com/robertojrojas/microservices-go/pets/pets-service/services"
 )
