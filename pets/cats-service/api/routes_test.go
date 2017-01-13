@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"strings"
+	"github.com/gorilla/mux"
 )
 
 
@@ -148,10 +149,10 @@ func TestCreateCatFails(t *testing.T) {
 	writer := httptest.NewRecorder()
 	json := strings.NewReader(`
 		{
-		   "cat_id": 1,
-		   "cat_name": "test_cat",
-		   "cat_age": 3,
-		   "cat_type": "funny"
+		   "id": 1,
+		   "name": "test_cat",
+		   "age": 3,
+		   "type": "funny"
 		}`)
 	request, err := http.NewRequest("POST", "/api/cats", json)
 
@@ -171,9 +172,83 @@ func TestCreateCatFails(t *testing.T) {
 
 }
 
-func TestReadHandler_OK(t *testing.T) {
+func TestShouldReadCat(t *testing.T) {
+
+	expectedCat := &Cat{
+			ID: 1,
+			Age: 1,
+			Name: "catty",
+			Type: "funny",
+		}
+
+	dataStore := &testCatsDataStore{
+		cat: expectedCat,
+	}
+	cr := &CatsRoutes{
+		catsDBStore: dataStore,
+	}
+
+	router := mux.NewRouter()
+	readRoute(router, errorHandler(cr.ReadHandler))
+
+	writer := httptest.NewRecorder()
+	request, err := http.NewRequest("GET", "/api/cats/1", nil)
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+
+	router.ServeHTTP(writer, request)
+	if writer.Code != http.StatusOK {
+		t.Errorf("Got error status code: %d ", writer.Code)
+	}
+
+	receivedCat := &Cat{}
+	err = json.Unmarshal(writer.Body.Bytes(), receivedCat)
+	if err != nil {
+		t.Error(err)
+	}
+	if receivedCat == nil {
+		t.Error("Expected cat")
+	}
+
 
 }
+
+func TestReadCatFails(t *testing.T) {
+
+	const errorMessage string = "Unable to read cat"
+	dataStore := &testCatsDataStore{
+		err:errors.New(errorMessage),
+	}
+
+	cr := &CatsRoutes{
+		catsDBStore: dataStore,
+	}
+
+	router := mux.NewRouter()
+	readRoute(router, errorHandler(cr.ReadHandler))
+
+	writer := httptest.NewRecorder()
+	request, err := http.NewRequest("GET", "/api/cats/1", nil)
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+
+	router.ServeHTTP(writer, request)
+	if writer.Code != http.StatusInternalServerError {
+		t.Errorf("Got error status code: %d ", writer.Code)
+	}
+
+	errStr := strings.Trim(string(writer.Body.Bytes()), "\n")
+	if errStr != errorMessage {
+		t.Errorf("Expected %q, but instead got %q", errorMessage, errStr)
+	}
+
+}
+
+
 
 func TestUpdateHandler_OK(t *testing.T) {
 

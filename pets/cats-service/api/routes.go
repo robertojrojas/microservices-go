@@ -12,11 +12,6 @@ import (
 )
 
 
-type RouterHandler interface {
-	HandleFunc(path string, f func(http.ResponseWriter, *http.Request)) *mux.Route
-	Methods(methods ...string) *mux.Route
-}
-
 // CatsRoutesHandler represents the HTTP Handler methods
 type CatsRoutesHandler interface {
 	CreateHandler(w http.ResponseWriter, r *http.Request) error
@@ -33,19 +28,39 @@ type CatsRoutes struct {
 }
 
 // SetupCatsRoutes return a new CatsRoutesHandler
-func SetupCatsRoutes(dataStore CatsDataStore, router RouterHandler) CatsRoutesHandler {
+func SetupCatsRoutes(dataStore CatsDataStore, router *mux.Router) CatsRoutesHandler {
 	cr := &CatsRoutes{
 		catsDBStore: dataStore,
 	}
 
-	router.HandleFunc("/api/cats", errorHandler(cr.ReadAllHandler)).Methods("GET")
-	router.HandleFunc("/api/cats", errorHandler(cr.CreateHandler)).Methods("POST")
-	router.HandleFunc("/api/cats/{id:[0-9]+}", errorHandler(cr.ReadHandler)).Methods("GET")
-	router.HandleFunc("/api/cats/{id:[0-9]+}", errorHandler(cr.UpdateHandler)).Methods("PUT")
-	router.HandleFunc("/api/cats/{id:[0-9]+}", errorHandler(cr.DeleteHandler)).Methods("DELETE")
+	readAllRoute(router, errorHandler(cr.ReadAllHandler))
+	createRoute(router,  errorHandler(cr.CreateHandler))
+	readRoute(router,    errorHandler(cr.ReadHandler))
+	updateRoute(router, errorHandler(cr.UpdateHandler))
+	deleteRoute(router, errorHandler(cr.DeleteHandler))
 
 	return cr
 
+}
+
+func readAllRoute(router *mux.Router, f func(w http.ResponseWriter, r *http.Request)){
+	router.HandleFunc("/api/cats", f).Methods("GET")
+}
+
+func createRoute(router *mux.Router, f func(w http.ResponseWriter, r *http.Request)){
+	router.HandleFunc("/api/cats", f).Methods("POST")
+}
+
+func readRoute(router *mux.Router, f func(w http.ResponseWriter, r *http.Request)){
+	router.HandleFunc("/api/cats/{id:[0-9]+}", f).Methods("GET")
+}
+
+func updateRoute(router *mux.Router, f func(w http.ResponseWriter, r *http.Request)){
+	router.HandleFunc("/api/cats/{id:[0-9]+}", f).Methods("PUT")
+}
+
+func deleteRoute(router *mux.Router, f func(w http.ResponseWriter, r *http.Request)){
+	router.HandleFunc("/api/cats/{id:[0-9]+}", f).Methods("DELETE")
 }
 
 func (cr *CatsRoutes) CreateHandler(w http.ResponseWriter, r *http.Request) error {
