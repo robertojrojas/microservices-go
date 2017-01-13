@@ -6,7 +6,7 @@ import (
 )
 
 
-func Test_getConfig_Default(t *testing.T) {
+func TestGetConfigDefault(t *testing.T) {
 
 	config := getConfig()
 
@@ -17,7 +17,7 @@ func Test_getConfig_Default(t *testing.T) {
 }
 
 
-func Test_getConfig_ModifiedViaEnvs(t *testing.T) {
+func TestGetConfigModifiedViaEnvs(t *testing.T) {
 
 	expectedMYSQLDBURI := "root:testlocation@tcp(:3306)/cats_db"
 	os.Setenv(mysqlDBURI_key, expectedMYSQLDBURI)

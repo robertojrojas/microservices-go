@@ -148,6 +148,9 @@ func (cr *CatsRoutes) UpdateHandler(w http.ResponseWriter, r *http.Request) erro
 	cat.ID = int64(id)
 
 	err = cr.catsDBStore.UpdateCat(cat)
+	if err == nil {
+		w.WriteHeader(http.StatusAccepted)
+	}
 	return err
 
 }
@@ -156,6 +159,9 @@ func (cr *CatsRoutes) DeleteHandler(w http.ResponseWriter, r *http.Request) erro
 	idStr := mux.Vars(r)["id"]
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	err = cr.catsDBStore.DeleteCat(id)
+	if err == nil {
+		w.WriteHeader(http.StatusNoContent)
+	}
 	return err
 }
 

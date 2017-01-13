@@ -5,23 +5,23 @@ import (
 	"testing"
 )
 
-func TestReadAllCats_OK(t *testing.T) {
+func TestReadAllCats(t *testing.T) {
 
 }
 
-func TestCreateCat_OK(t *testing.T) {
+func TestCreateCatModel(t *testing.T) {
 
 }
 
-func TestReadCat_OK(t *testing.T) {
+func TestReadCatModel(t *testing.T) {
 
 }
 
-func TestUpdateCat_OK(t *testing.T) {
+func TestUpdateCatModel(t *testing.T) {
 
 }
 
-func TestDeleteCat_OK(t *testing.T) {
+func TestDeleteCatModel(t *testing.T) {
 
 }
 

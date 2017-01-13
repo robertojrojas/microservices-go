@@ -250,13 +250,144 @@ func TestReadCatFails(t *testing.T) {
 
 
 
-func TestUpdateHandler_OK(t *testing.T) {
+func TestUpdateCat(t *testing.T) {
+
+	dataStore := &testCatsDataStore{
+	}
+	cr := &CatsRoutes{
+		catsDBStore: dataStore,
+	}
+
+	router := mux.NewRouter()
+	updateRoute(router, errorHandler(cr.UpdateHandler))
+
+	writer := httptest.NewRecorder()
+	json := strings.NewReader(`
+		{
+		   "id": 1,
+		   "name": "test_cat",
+		   "age": 3,
+		   "type": "funny"
+		}`)
+	request, err := http.NewRequest("PUT", "/api/cats/1", json)
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+
+	router.ServeHTTP(writer, request)
+	if writer.Code != http.StatusAccepted {
+		t.Errorf("Got error status code: %d ", writer.Code)
+	}
 
 }
 
+func TestUpdateCatFails(t *testing.T) {
 
-func TestDeleteHandler_OK(t *testing.T) {
+	const errorMessage string = "Unable to update cat"
+	dataStore := &testCatsDataStore{
+		err:errors.New(errorMessage),
+	}
 
+	cr := &CatsRoutes{
+		catsDBStore: dataStore,
+	}
+
+	router := mux.NewRouter()
+	updateRoute(router, errorHandler(cr.UpdateHandler))
+
+	writer := httptest.NewRecorder()
+	json := strings.NewReader(`
+		{
+		   "id": 1,
+		   "name": "test_cat",
+		   "age": 3,
+		   "type": "funny"
+		}`)
+	request, err := http.NewRequest("PUT", "/api/cats/1", json)
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+
+	router.ServeHTTP(writer, request)
+	if writer.Code != http.StatusInternalServerError {
+		t.Errorf("Got error status code: %d ", writer.Code)
+	}
+
+	errStr := strings.Trim(string(writer.Body.Bytes()), "\n")
+	if errStr != errorMessage {
+		t.Errorf("Expected %q, but instead got %q", errorMessage, errStr)
+	}
+}
+
+
+func TestDeleteCat(t *testing.T) {
+	dataStore := &testCatsDataStore{
+	}
+	cr := &CatsRoutes{
+		catsDBStore: dataStore,
+	}
+
+	router := mux.NewRouter()
+	deleteRoute(router, errorHandler(cr.DeleteHandler))
+
+	writer := httptest.NewRecorder()
+	json := strings.NewReader(`
+		{
+		   "id": 1,
+		   "name": "test_cat",
+		   "age": 3,
+		   "type": "funny"
+		}`)
+	request, err := http.NewRequest("DELETE", "/api/cats/1", json)
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+
+	router.ServeHTTP(writer, request)
+	if writer.Code != http.StatusNoContent {
+		t.Errorf("Got error status code: %d ", writer.Code)
+	}
+}
+
+func TestDeleteCatFails(t *testing.T) {
+	const errorMessage string = "Unable to delete cat"
+	dataStore := &testCatsDataStore{
+		err:errors.New(errorMessage),
+	}
+
+	cr := &CatsRoutes{
+		catsDBStore: dataStore,
+	}
+
+	router := mux.NewRouter()
+	deleteRoute(router, errorHandler(cr.DeleteHandler))
+
+	writer := httptest.NewRecorder()
+	json := strings.NewReader(`
+		{
+		   "id": 1,
+		   "name": "test_cat",
+		   "age": 3,
+		   "type": "funny"
+		}`)
+	request, err := http.NewRequest("DELETE", "/api/cats/1", json)
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+
+	router.ServeHTTP(writer, request)
+	if writer.Code != http.StatusInternalServerError {
+		t.Errorf("Got error status code: %d ", writer.Code)
+	}
+
+	errStr := strings.Trim(string(writer.Body.Bytes()), "\n")
+	if errStr != errorMessage {
+		t.Errorf("Expected %q, but instead got %q", errorMessage, errStr)
+	}
 }
 
 type testCatsDataStore struct {
