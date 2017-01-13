@@ -11,9 +11,10 @@ import (
 )
 
 var serverHostPort string
-const mysqlDBURI_key = "MYSQL_DB_URI"
-const defaultMYSQLURI = "root:my-secret-pw@tcp(:3306)/cats_db"
-
+const (
+	mysqlDBURI_key = "MYSQL_DB_URI"
+	defaultMYSQLURI = "root:my-secret-pw@tcp(:3306)/cats_db"
+)
 func init() {
 	flag.StringVar(&serverHostPort, "http", ":8091", "Host and port server listens on")
 }

@@ -168,9 +168,9 @@ func errorHandler(f func(w http.ResponseWriter, r *http.Request) error) http.Han
 		case badRequest:
 			http.Error(w, err.Error(), http.StatusBadRequest)
 		case notFound:
-			http.Error(w, "task not found", http.StatusNotFound)
+			http.Error(w, "resource not found", http.StatusNotFound)
 		default:
-			http.Error(w, "oops", http.StatusInternalServerError)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	}
 }

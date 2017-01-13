@@ -36,7 +36,6 @@ func shutdownHook(signalChan chan os.Signal, errChan chan error) error {
 	for {
 		select {
 		case err := <-errChan:
-			fmt.Println("returning error...")
 			return err
 		case s := <-signalChan:
 			return errors.New(fmt.Sprintf("Captured %v. Exiting...", s))
