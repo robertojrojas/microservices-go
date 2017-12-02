@@ -2,13 +2,14 @@ package api
 
 import (
 	"crypto/tls"
+	"crypto/x509"
 	"database/sql"
 	"errors"
 	"fmt"
 	"log"
 	"os"
 
-	_ "github.com/go-sql-driver/mysql"
+	"github.com/go-sql-driver/mysql"
 )
 
 type DB interface {
@@ -84,48 +85,59 @@ func buildMYSQLConnString(envConfig *config) string {
 		envConfig.mySQLDBPort,
 		envConfig.mySQLDBName,
 	)
-	if config.mySQLDBTLSCert != "" {
+	if envConfig.mySQLDBTLSCert != "" {
 		mysqlURL = fmt.Sprintf("%s?tls=%s", mysqlURL, customTLS)
 	}
+	return mysqlURL
 }
 
 func setupTLS(envConfig *config) {
-	if config.mySQLDBTLSCert != "" {
-		rootCertPool := getSSLCert(config)
+	if envConfig.mySQLDBTLSCert != "" {
+		rootCertPool := getSSLCert(envConfig)
 		mysql.RegisterTLSConfig(customTLS, &tls.Config{
 			RootCAs: rootCertPool,
 		})
 	}
 }
 
-func getDBConnection() (*sql.DB, error){
+func getSSLCert(envConfig *config) *x509.CertPool {
+	rootCertPool := x509.NewCertPool()
+	cert := []byte(envConfig.mySQLDBTLSCert)
+	if ok := rootCertPool.AppendCertsFromPEM(cert); !ok {
+		log.Fatal("Failed to append PEM.")
+	}
+	return rootCertPool
+}
+
+func getDBConnection() (*sql.DB, error) {
 	config := getConfig()
 	setupTLS(config)
 	dbURL := buildMYSQLConnString(config)
 	log.Printf("Connecting to DB[%s]....\n", dbURL)
-	theDB, err := sql.Open("mysql", dbURL)
+	dbConn, err := sql.Open("mysql", dbURL)
 	if err != nil {
 		return nil, err
 	}
+	return dbConn, nil
 }
 
 // ConnectToDB connects to the database
-func connectToDB() (db *sql.DB, error) {
-	theDB, err := getDBConnection()
+func connectToDB() (*sql.DB, error) {
+	dbConn, err := getDBConnection()
 	if err != nil {
 		return nil, err
 	}
 
 	//Connection pool sample configuration
-	theDB.SetMaxIdleConns(2)
-	theDB.SetMaxOpenConns(10)
+	dbConn.SetMaxIdleConns(2)
+	dbConn.SetMaxOpenConns(10)
 
-	err = theDB.Ping()
+	err = dbConn.Ping()
 	if err != nil {
 		return nil, err
 	}
 
-	return theDB
+	return dbConn, nil
 
 }
 

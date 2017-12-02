@@ -17,7 +17,6 @@ func init() {
 // StartServer configures and starts API Server
 func StartServer() error {
 
-	config := getConfig()
 	router := mux.NewRouter()
 	catsDB, err := NewCatsDB()
 	if err != nil {

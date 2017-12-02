@@ -8,3 +8,4 @@ subsets:
     - ip: 10.0.1.122
   ports:
     - port: 3306
+      name: "mysql"
