@@ -8,10 +8,10 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/robertojrojas/microservices-go/pets/cats-service/api"
 	"errors"
-)
 
+	"github.com/robertojrojas/microservices-go/pets/cats-service/api"
+)
 
 func main() {
 
@@ -28,9 +28,7 @@ func main() {
 	err := shutdownHook(signalChan, errChan)
 	log.Fatal(err)
 
-
 }
-
 
 func shutdownHook(signalChan chan os.Signal, errChan chan error) error {
 	for {

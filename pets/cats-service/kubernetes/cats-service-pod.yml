@@ -13,12 +13,27 @@ spec:
     ports:
       - containerPort: 8091
     env:
-      - name: MYSQL_DB_URI
+      - name: MYSQL_HOST
         valueFrom:
           configMapKeyRef:
             name: mysql-config
-            key: mysql.uri
-    resources:
-      limits:
-        cpu: "0.1"
-        memory: "10Mi"
+            key: mysql.host
+      - name: MYSQL_PORT
+        valueFrom:
+          configMapKeyRef:
+            name: mysql-config
+            key: mysql.port
+      - name: MYSQL_USERNAME
+        valueFrom:
+          secretKeyRef:
+            name: mysql-secrets
+            key: username
+      - name: MYSQL_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: mysql-secrets
+            key: password
+  volumes:
+  - name: mysql-secrets
+    secret:
+      secretName: mysql-secrets
